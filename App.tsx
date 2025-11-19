@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/Achievements'; // Achievements doubles as quick stats details
@@ -10,12 +10,25 @@ import Footer from './components/Footer';
 import { CERTIFICATIONS } from './constants';
 
 const App: React.FC = () => {
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+
+  // Handle Escape key to close terminal
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsTerminalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
   return (
     <div className="min-h-screen bg-bgDark text-textPrimary font-sans selection:bg-primary/30 selection:text-white">
       <Navbar />
       
       <main>
-        <Hero />
+        <Hero onOpenTerminal={() => setIsTerminalOpen(true)} />
         <About />
         
         {/* Certification Section - Small enough to be inline */}
@@ -36,8 +49,9 @@ const App: React.FC = () => {
         <Skills />
         <Experience />
         <Projects />
-        <Terminal />
       </main>
+      
+      {isTerminalOpen && <Terminal onClose={() => setIsTerminalOpen(false)} />}
       
       <Footer />
     </div>

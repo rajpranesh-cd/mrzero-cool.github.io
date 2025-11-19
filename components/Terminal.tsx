@@ -1,12 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { SKILLS, EXPERIENCE, PROJECTS, STATS } from '../constants';
+import { Icons } from './Icons';
+
+interface TerminalProps {
+  onClose: () => void;
+}
 
 interface TerminalLine {
   type: 'input' | 'output';
   content: string | React.ReactNode;
 }
 
-const Terminal: React.FC = () => {
+const Terminal: React.FC<TerminalProps> = ({ onClose }) => {
   const [history, setHistory] = useState<TerminalLine[]>([
     { type: 'output', content: 'Welcome to Rajpranesh Security Terminal v1.0.0' },
     { type: 'output', content: 'Type "help" to see available commands.' },
@@ -14,32 +19,24 @@ const Terminal: React.FC = () => {
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
 
+  // Scroll to bottom on history change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history]);
 
-  // Auto-focus input when terminal comes into view
+  // Auto-focus input on mount
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          // Small delay to ensure animation/scroll settles
-          setTimeout(() => {
-            inputRef.current?.focus();
-          }, 500);
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
+
+  // Keep focus
+  const keepFocus = () => {
+    inputRef.current?.focus();
+  };
 
   const handleCommand = (cmd: string) => {
     const trimmedCmd = cmd.trim().toLowerCase();
@@ -56,6 +53,7 @@ const Terminal: React.FC = () => {
             <p><span className="text-primary">stats</span> - Show key metrics</p>
             <p><span className="text-primary">contact</span> - Display contact info</p>
             <p><span className="text-primary">clear</span> - Clear terminal</p>
+            <p><span className="text-primary">exit</span> - Close terminal</p>
           </div>
         );
         break;
@@ -78,7 +76,7 @@ const Terminal: React.FC = () => {
         // Simplified text output for terminal
         response = (
            <div className="space-y-2">
-             <div className="text-tertiary font-bold">Senior Application Security Engineer @ Cloud Destinations (Nov 2021 - Present)</div>
+             <div className="text-tertiary font-bold">Senior Security Engineer @ Cloud Destinations (Nov 2021 - Present)</div>
              <ul className="list-disc pl-5 text-textSecondary">
                 <li>Architected DevSecOps platform for 75+ apps (95% automation)</li>
                 <li>Reduced organizational vulnerabilities by 80%</li>
@@ -116,6 +114,9 @@ const Terminal: React.FC = () => {
       case 'clear':
         setHistory([]);
         return;
+      case 'exit':
+        onClose();
+        return;
       case '':
         response = '';
         break;
@@ -138,22 +139,26 @@ const Terminal: React.FC = () => {
   };
 
   return (
-    <section id="terminal" ref={sectionRef} className="py-20 bg-bgSecondary px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in-up">
+      <div className="w-full max-w-4xl">
         <div className="bg-[#1e1e1e] rounded-lg shadow-2xl border border-gray-700 overflow-hidden transform transition-all hover:shadow-[0_0_30px_rgba(0,255,157,0.15)]">
           {/* Terminal Header */}
           <div className="bg-[#2d2d2d] px-4 py-2 flex items-center justify-between border-b border-gray-700">
             <div className="flex space-x-2">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
+              <div onClick={onClose} className="w-3 h-3 rounded-full bg-red-500 cursor-pointer hover:bg-red-600 transition-colors" title="Close"></div>
               <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
             </div>
             <div className="text-gray-400 text-sm font-mono">rajpranesh@security-terminal: ~/portfolio</div>
-            <div className="w-10"></div>
+            <div className="w-4 flex justify-end">
+              <button onClick={onClose} className="text-gray-400 hover:text-white">
+                <Icons.X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Terminal Body */}
-          <div className="p-4 h-96 overflow-y-auto font-mono text-sm bg-[#0a0e1a] text-gray-300" onClick={() => inputRef.current?.focus()}>
+          <div className="p-4 h-[60vh] overflow-y-auto font-mono text-sm bg-[#0a0e1a] text-gray-300" onClick={keepFocus}>
             {history.map((line, i) => (
               <div key={i} className="mb-1 break-words">
                 {line.type === 'input' ? (
@@ -179,13 +184,18 @@ const Terminal: React.FC = () => {
                 className="bg-transparent border-none outline-none text-gray-100 flex-1 font-mono terminal-cursor"
                 autoComplete="off"
                 spellCheck="false"
+                autoFocus
               />
             </div>
             <div ref={bottomRef} />
           </div>
         </div>
+        
+        <div className="text-center mt-4 text-textSecondary text-sm font-mono">
+          Press 'ESC' or type 'exit' to close
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
 

@@ -26,17 +26,17 @@ const Projects: React.FC = () => {
 
   return (
     <section id="projects" ref={sectionRef} className="py-20 bg-bgSecondary px-4">
-      <div className={`max-w-7xl mx-auto transition-all duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <div className={`max-w-7xl mx-auto transition-all duration-1000 ease-out transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-center">
-          <span className="border-b-4 border-secondary pb-2">Deployed Operations</span>
+          <span className="border-b-4 border-secondary pb-2">Security Projects</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
           {PROJECTS.map((project, idx) => (
             <div 
               key={idx}
-              className={`group relative bg-bgSurface overflow-hidden rounded-xl border border-gray-800 transition-all duration-500 hover:border-secondary hover:-translate-y-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-              style={{ transitionDelay: `${idx * 200}ms` }}
+              className={`group relative bg-bgSurface overflow-hidden rounded-xl border border-gray-800 transition-all duration-700 ease-out hover:border-secondary hover:-translate-y-2 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+              style={{ transitionDelay: `${100 + idx * 150}ms` }}
             >
               {/* Decorative Header */}
               <div className="h-2 bg-gradient-to-r from-secondary to-quaternary w-full"></div>

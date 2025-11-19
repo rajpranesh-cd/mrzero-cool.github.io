@@ -2,7 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { Icons } from './Icons';
 import { STATS } from '../constants';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onOpenTerminal: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onOpenTerminal }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -27,6 +31,8 @@ const Hero: React.FC = () => {
       alpha: number;
       angle: number;
       speed: number;
+      oscillationSpeed: number;
+      oscillationAmplitude: number;
     }[] = [];
     
     const particleCount = width < 600 ? 30 : 60;
@@ -40,14 +46,16 @@ const Hero: React.FC = () => {
         size: Math.random() * 2 + 1,
         alpha: Math.random() * 0.5 + 0.2,
         angle: Math.random() * Math.PI * 2,
-        speed: Math.random() * 0.02 + 0.005
+        speed: Math.random() * 0.02 + 0.005,
+        oscillationSpeed: Math.random() * 0.02 + 0.01,
+        oscillationAmplitude: Math.random() * 20 + 10
       });
     }
 
     let time = 0;
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
-      time += 0.01;
+      time += 1;
       
       particles.forEach((p) => {
         ctx.beginPath();
@@ -55,21 +63,21 @@ const Hero: React.FC = () => {
         ctx.fillStyle = `rgba(0, 255, 157, ${p.alpha})`;
         ctx.fill();
 
-        // Complex movement: Linear drift + Sine wave float
-        p.x += p.dx + Math.sin(time + p.angle) * 0.3;
-        p.y += p.dy + Math.cos(time + p.angle) * 0.3;
+        // Enhanced floating movement
+        // Combine linear velocity with sine wave oscillation
+        p.x += p.dx + Math.sin(time * p.oscillationSpeed + p.angle) * 0.1;
+        p.y += p.dy + Math.cos(time * p.oscillationSpeed + p.angle) * 0.1;
 
-        // Gentle pulse in size
-        const sizePulse = Math.sin(time * p.speed) * 0.5; 
-        // ctx.arc uses p.size, we simulate visual size change via drawing (not changing state to keep physics simple)
-        
+        // Vertical floating effect (bobbing)
+        p.y += Math.sin(time * 0.02 + p.angle) * 0.2;
+
         // Wrap around edges seamlessly
-        if (p.x < -10) p.x = width + 10;
-        if (p.x > width + 10) p.x = -10;
-        if (p.y < -10) p.y = height + 10;
-        if (p.y > height + 10) p.y = -10;
+        if (p.x < -50) p.x = width + 50;
+        if (p.x > width + 50) p.x = -50;
+        if (p.y < -50) p.y = height + 50;
+        if (p.y > height + 50) p.y = -50;
 
-        // Connect lines
+        // Connect lines with distance check
         particles.forEach((p2) => {
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
@@ -113,37 +121,26 @@ const Hero: React.FC = () => {
     STATS.find(s => s.label === 'Threats Blocked') || STATS[5],
   ];
 
-  const scrollToTerminal = () => {
-    const terminal = document.getElementById('terminal');
-    if (terminal) {
-      terminal.scrollIntoView({ behavior: 'smooth' });
-      // Attempt to focus the input after scroll
-      setTimeout(() => {
-        document.getElementById('terminal-input')?.focus();
-      }, 1000);
-    }
-  };
-
   return (
     <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden bg-bgDark">
       <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full opacity-60 pointer-events-none" />
       
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
+        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight animate-fade-in-up">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Rajpranesh M</span>
         </h1>
         
-        <h2 className="text-xl md:text-2xl text-textSecondary mb-8 font-mono">
+        <h2 className="text-xl md:text-2xl text-textSecondary mb-8 font-mono animate-fade-in-up animation-delay-200">
           Senior Security Engineer | AppSec Specialist | DevSecOps Expert
         </h2>
         
-        <p className="text-textSecondary max-w-2xl mx-auto mb-10 leading-relaxed">
+        <p className="text-textSecondary max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up animation-delay-400">
           Security Engineer with 4+ years of hands-on experience in Application Security, DevSecOps, and Cloud Security across AWS/Azure environments.
           Built comprehensive security programs that reduced organizational vulnerabilities by 80% and achieved zero-finding compliance audits.
         </p>
         
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <button onClick={scrollToTerminal} className="group relative px-8 py-3 bg-primary/10 border border-primary text-primary font-mono font-bold rounded overflow-hidden transition-all hover:bg-primary hover:text-bgDark">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up animation-delay-600">
+          <button onClick={onOpenTerminal} className="group relative px-8 py-3 bg-primary/10 border border-primary text-primary font-mono font-bold rounded overflow-hidden transition-all hover:bg-primary hover:text-bgDark">
             <span className="relative z-10 flex items-center gap-2">
                OPEN_TERMINAL <span className="group-hover:translate-x-1 transition-transform">_&gt;</span>
             </span>
@@ -160,7 +157,7 @@ const Hero: React.FC = () => {
         </div>
 
         {/* Quick Stats Bar */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/10 pt-8 text-sm font-mono text-textSecondary">
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/10 pt-8 text-sm font-mono text-textSecondary animate-fade-in-up animation-delay-800">
           {heroStats.map((stat, idx) => (
              <div key={idx} className="flex flex-col items-center">
                <span className={`${stat.color} font-bold text-xl`}>{stat.value}</span>

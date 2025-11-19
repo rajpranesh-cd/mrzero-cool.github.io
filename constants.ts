@@ -6,7 +6,6 @@ export const NAV_LINKS = [
   { name: 'SKILLS', href: '#skills' },
   { name: 'EXPERIENCE', href: '#experience' },
   { name: 'PROJECTS', href: '#projects' },
-  { name: 'TERMINAL', href: '#terminal' },
 ];
 
 export const STATS: Stat[] = [
@@ -20,7 +19,7 @@ export const STATS: Stat[] = [
 
 export const EXPERIENCE: Experience[] = [
   {
-    title: "Senior Application Security Engineer",
+    title: "Senior Security Engineer",
     company: "Cloud Destinations",
     duration: "Nov 2021 - Present",
     achievements: [
